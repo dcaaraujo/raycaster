@@ -7,14 +7,15 @@ namespace Raycaster;
 
 public class Maze
 {
-    public const int WindowWidth = ColumnCount * TileSize;
-    public const int WindowHeight = RowCount * TileSize;
-    public const int WallStripWidth = 8;
-    public const int TileSize = 64;
     private const float MinimapScaleFactor = 0.2f;
     private const int RowCount = 11;
     private const int ColumnCount = 15;
     private const int PlayerDotRadius = 4;
+    
+    public const int WindowWidth = ColumnCount * TileSize;
+    public const int WindowHeight = RowCount * TileSize;
+    public const int WallStripWidth = 8;
+    public const int TileSize = 64;
 
     private readonly int[,] _grid =
     {
@@ -41,13 +42,6 @@ public class Maze
         var gridX = (int)Math.Floor(position.X / TileSize);
         var gridY = (int)Math.Floor(position.Y / TileSize);
         return _grid[gridY, gridX] != 0;
-    }
-
-    private static (int, int) PositionOfPlayerInGrid(Player player)
-    {
-        var x = (int)Math.Floor(player.Position.X / TileSize);
-        var y = (int)Math.Floor(player.Position.Y / TileSize);
-        return (x, y);
     }
 
     public void CastRay(Point2 startPosition, Ray ray)
@@ -77,6 +71,54 @@ public class Maze
             ray.WallIntersection = horizontalPoint ?? Point2.Zero;
             ray.VerticalHit = false;
         }
+    }
+
+    public void Draw(SpriteBatch spriteBatch, Player player)
+    {
+        for (var i = 0; i < RowCount; i++)
+        {
+            for (var j = 0; j < ColumnCount; j++)
+            {
+                float tileX = j * TileSize;
+                float tileY = i * TileSize;
+                var color = HasWallAt(new Point2(tileX, tileY)) ? Color.Gray : Color.White;
+                var playerPosition = PositionOfPlayerInGrid(player);
+                var isPlayerInBlock = playerPosition.Item1 == j && playerPosition.Item2 == i;
+                if (isPlayerInBlock)
+                {
+                    color = Color.Yellow;
+                }
+
+                var rect = new RectangleF
+                (
+                    tileX * MinimapScaleFactor,
+                    tileY * MinimapScaleFactor,
+                    TileSize * MinimapScaleFactor,
+                    TileSize * MinimapScaleFactor
+                );
+                spriteBatch.DrawRectangle(rect, Color.Black);
+                spriteBatch.FillRectangle(rect, color);
+            }
+        }
+
+        var playerDotPosition = new Point2
+        (
+            player.Position.X * MinimapScaleFactor,
+            player.Position.Y * MinimapScaleFactor
+        );
+        var circle = new CircleF(playerDotPosition, PlayerDotRadius);
+        spriteBatch.DrawCircle(circle, 20, Color.Black, 2f);
+        foreach (var ray in player.Rays)
+        {
+            spriteBatch.DrawLine(playerDotPosition, ray.Distance * Maze.MinimapScaleFactor, ray.Angle, Color.Red);
+        }
+    }
+
+    private static (int, int) PositionOfPlayerInGrid(Player player)
+    {
+        var x = (int)Math.Floor(player.Position.X / TileSize);
+        var y = (int)Math.Floor(player.Position.Y / TileSize);
+        return (x, y);
     }
 
     private Point2? CalculateHorizontalGridIntersection(Point2 startPosition, Ray ray)
@@ -152,46 +194,5 @@ public class Maze
     private static bool InsideMaze(Point2 point)
     {
         return point.X is >= 0 and <= WindowWidth && point.Y is >= 0 and <= WindowHeight;
-    }
-
-    public void Draw(SpriteBatch spriteBatch, Player player)
-    {
-        for (var i = 0; i < RowCount; i++)
-        {
-            for (var j = 0; j < ColumnCount; j++)
-            {
-                float tileX = j * TileSize;
-                float tileY = i * TileSize;
-                var color = HasWallAt(new Point2(tileX, tileY)) ? Color.Gray : Color.White;
-                var playerPosition = PositionOfPlayerInGrid(player);
-                var isPlayerInBlock = playerPosition.Item1 == j && playerPosition.Item2 == i;
-                if (isPlayerInBlock)
-                {
-                    color = Color.Yellow;
-                }
-
-                var rect = new RectangleF
-                (
-                    tileX * MinimapScaleFactor,
-                    tileY * MinimapScaleFactor,
-                    TileSize * MinimapScaleFactor,
-                    TileSize * MinimapScaleFactor
-                );
-                spriteBatch.DrawRectangle(rect, Color.Black);
-                spriteBatch.FillRectangle(rect, color);
-            }
-        }
-
-        var playerDotPosition = new Point2
-        (
-            player.Position.X * MinimapScaleFactor,
-            player.Position.Y * MinimapScaleFactor
-        );
-        var circle = new CircleF(playerDotPosition, PlayerDotRadius);
-        spriteBatch.DrawCircle(circle, 20, Color.Black, 2f);
-        foreach (var ray in player.Rays)
-        {
-            spriteBatch.DrawLine(playerDotPosition, ray.Distance * Maze.MinimapScaleFactor, ray.Angle, Color.Red);
-        }
     }
 }

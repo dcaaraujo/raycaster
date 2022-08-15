@@ -10,18 +10,13 @@ public class Player
     private const int RayCount = Maze.WindowWidth / Maze.WallStripWidth;
     private const float RotationSpeed = 45 * (MathHelper.Pi / 180);
     private const float MoveSpeed = 100f;
-    private readonly IList<Ray> _rays = new List<Ray>(RayCount);
-
     public const float FovAngle = 60 * (MathHelper.Pi / 180);
 
+    private readonly IList<Ray> _rays = new List<Ray>(RayCount);
     public IEnumerable<Ray> Rays => _rays;
-
     public float RotationAngle { get; set; }
-
     public Point2 Position { get; set; }
-
     public TurnDirection TurnDirection { get; set; }
-
     public WalkDirection WalkDirection { get; set; }
 
     public Player()

@@ -15,7 +15,7 @@ public class Projector
 
         var floorRect = new RectangleF(0, Maze.WindowHeight / 2f, Maze.WindowWidth, Maze.WindowHeight);
         spriteBatch.FillRectangle(floorRect, new Color(0.51f, 0.51f, 0.51f));
-        
+
         foreach (var (i, ray) in player.Rays.Select((r, i) => (i, r)))
         {
             var wallDistance = ray.Distance * Math.Cos(ray.Angle - player.RotationAngle);
